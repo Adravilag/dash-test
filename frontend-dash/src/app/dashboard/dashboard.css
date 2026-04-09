@@ -1,0 +1,25 @@
+.nav-buttons {
+  display: flex;
+  gap: 12px;
+  padding: 15px;
+  background-color: #f8f9fa; /* Un gris muy suave */
+  border-bottom: 1px solid #e9ecef;
+  margin-bottom: 20px;
+}
+
+button {
+  background: white;
+  border: 1px solid #dee2e6;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+button:hover {
+  border-color: #4c6ef5;
+  color: #4c6ef5;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
