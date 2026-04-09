@@ -13,9 +13,10 @@ import { SalesTableComponent } from './sales-table.component'; // <-- Importante
   }
 })
 export class Dashboard {
-  dashUrl = signal('http://localhost:8050/ventas');
+  // dashUrl = signal('http://localhost:8050/ventas');
+  dashUrl = signal('https://dash-test-b9tv.onrender.com/ventas');
   loading = signal(true);
-  
+
   // --- NUEVAS PROPIEDADES PARA CORREGIR LOS ERRORES ---
   
   // Controla qué vista mostrar: 'graficos' (Dash) o 'tabla' (Angular)
@@ -24,7 +25,8 @@ export class Dashboard {
   cambiarVista(ruta: string) {
     this.vistaActual.set('graficos'); // Cambiamos a modo gráficos
     this.loading.set(true);
-    this.dashUrl.set(`http://localhost:8050/${ruta}`);
+    // this.dashUrl.set(`http://localhost:8050/${ruta}`);
+    this.dashUrl.set(`https://dash-test-b9tv.onrender.com/${ruta}`);
   }
 
   mostrarTabla() {

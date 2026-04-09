@@ -8,7 +8,8 @@ import { Observable } from 'rxjs';
 })
 export class SalesService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:8050/api/ventas';
+  // private apiUrl = 'http://localhost:8050/api/ventas';
+  private apiUrl = 'https://dash-test-b9tv.onrender.com/api/ventas';
 
   getVentas(): Observable<any[]> {
     return this.http.get<any[]>(this.apiUrl);
