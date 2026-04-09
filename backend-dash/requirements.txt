@@ -1,0 +1,7 @@
+dash==4.1.0
+dash-mantine-components==2.6.1
+dash-iconify==0.1.2
+pandas==3.0.2
+flask-cors==6.0.2
+plotly==6.6.0
+gunicorn
