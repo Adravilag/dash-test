@@ -1,0 +1,62 @@
+body {
+    background-color: transparent !important;
+    margin: 0;
+    overflow-x: hidden;
+}
+
+/* Forzar que los contenedores de Dash/Plotly no pongan ancho fijo */
+.dash-graph, .js-plotly-plot, .plot-container {
+    width: 100% !important;
+}
+
+.js-plotly-plot .plotly .main-svg {
+    background: transparent !important;
+    width: 100% !important;
+}
+
+/* El SVG interno de Plotly a veces queda con width hardcodeado en el attr */
+.js-plotly-plot svg {
+    width: 100% !important;
+}
+
+@keyframes slideUpFade {
+    0% {
+        opacity: 0;
+        transform: translateY(40px) scale(0.96);
+        filter: blur(8px);
+    }
+    60% {
+        opacity: 0.8;
+        filter: blur(0);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+}
+
+#page-content {
+    animation: slideUpFade 0.9s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+    backface-visibility: hidden;
+    will-change: transform, opacity, filter;
+    /* Importante: el will-change no debe incluir width */
+}
+
+.animate-target, .mantine-Paper-root {
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Separar "all" por propiedades concretas evita que la transición
+       interfiera con el resize del gráfico */
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.animate-target:hover, .mantine-Paper-root:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1),
+                0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+    border-color: #4c6ef5;
+}
