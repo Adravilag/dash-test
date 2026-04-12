@@ -1,39 +1,69 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
-import { SafePipe } from './safe.pipe';
-import { SalesTableComponent } from './sales-table.component'; // <-- Importante
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { SalesTableComponent } from './sales-table.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, SafePipe, SalesTableComponent], // <-- Añadido aquí
-  templateUrl: './dashboard.html', // Asegúrate de que el nombre coincida (dashboard.html o dashboard.component.html)
+  imports: [CommonModule, SalesTableComponent],
+  templateUrl: './dashboard.html',
+  // OnPush reduce drásticamente la carga de CPU al ignorar ciclos de detección innecesarios
+  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     'ngSkipHydration': 'true'
   }
 })
-export class Dashboard {
-  // dashUrl = signal('http://localhost:8050/ventas');
-  dashUrl = signal('https://dash-test-b9tv.onrender.com/ventas');
-  loading = signal(true);
-
-  // --- NUEVAS PROPIEDADES PARA CORREGIR LOS ERRORES ---
+export class Dashboard implements OnInit {
+  private http = inject(HttpClient);
+  private sanitizer = inject(DomSanitizer);
   
-  // Controla qué vista mostrar: 'graficos' (Dash) o 'tabla' (Angular)
-  vistaActual = signal<'graficos' | 'tabla'>('graficos');
+  // Base URL para evitar hardcoding en múltiples sitios
+  // private readonly baseUrl = 'http://localhost:8050';
+  private readonly baseUrl = 'https://dash-test-b9tv.onrender.com';
 
-  cambiarVista(ruta: string) {
-    this.vistaActual.set('graficos'); // Cambiamos a modo gráficos
-    this.loading.set(true);
-    // this.dashUrl.set(`http://localhost:8050/${ruta}`);
-    this.dashUrl.set(`https://dash-test-b9tv.onrender.com/${ruta}`);
+  // Signals para un manejo de estado reactivo y eficiente
+  dashUrl = signal<SafeResourceUrl>(this.sanitizer.bypassSecurityTrustResourceUrl(`${this.baseUrl}/ventas`));
+  pathActual = signal('/ventas'); 
+  
+  loading = signal(true);
+  vistaActual = signal<'graficos' | 'tabla'>('graficos');
+  dashboardsDisponibles = signal<any[]>([]);
+
+  ngOnInit() {
+    this.cargarConfiguracion();
+  }
+
+  cargarConfiguracion() {
+    this.http.get<any>(`${this.baseUrl}/api/config`).subscribe({
+      next: (data) => this.dashboardsDisponibles.set(data.dashboards),
+      error: (err) => console.error('Error de conexión con Dash:', err)
+    });
+  }
+
+  cambiarVista(path: string) {
+    // Evita recargar el iframe si el usuario pulsa el botón del gráfico activo
+    if (this.pathActual() === path && this.vistaActual() === 'graficos') return;
+
+    this.vistaActual.set('graficos');
+    this.loading.set(true); // El loader se quita en onIframeLoad()
+    this.pathActual.set(path);
+    
+    // Actualización directa del Signal de URL
+    this.dashUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(`${this.baseUrl}${path}`));
   }
 
   mostrarTabla() {
-    this.vistaActual.set('tabla'); // Cambiamos a modo tabla nativa
+    if (this.vistaActual() === 'tabla') return;
+    this.vistaActual.set('tabla');
   }
 
+  /**
+   * Se dispara cuando el iframe termina de recibir el contenido.
+   * Eliminamos cualquier retraso artificial para una sensación de velocidad pura.
+   */
   onIframeLoad() {
-    setTimeout(() => this.loading.set(false), 300);
+    this.loading.set(false);
   }
 }

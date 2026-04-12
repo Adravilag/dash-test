@@ -1,29 +1,20 @@
-<div class="p-6 bg-slate-50 min-h-screen" ngSkipHydration>
+<div class="p-6 bg-slate-50 min-h-screen">
   
   <div class="flex items-center justify-between mb-8 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-    <div class="flex gap-4">
-      <button (click)="cambiarVista('ventas')" 
-              [class.ring-2]="vistaActual() === 'graficos' && dashUrl().includes('ventas')"
-              class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all active:scale-95 shadow-md font-medium">
-        Ventas por Producto
-      </button>
-      
-      <button (click)="cambiarVista('categorias')" 
-              [class.ring-2]="vistaActual() === 'graficos' && dashUrl().includes('categorias')"
-              class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all active:scale-95 shadow-md font-medium">
-        Categorías
-      </button>
-
-      <button (click)="cambiarVista('evolucion')" 
-              [class.ring-2]="vistaActual() === 'graficos' && dashUrl().includes('evolucion')"
-              class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all active:scale-95 shadow-md font-medium">
-        Evolución
-      </button>
+    <div class="flex gap-4 flex-wrap">
+      @for (dash of dashboardsDisponibles(); track dash.id) {
+        <button (click)="cambiarVista(dash.path)" 
+                [class.ring-4]="vistaActual() === 'graficos' && pathActual() === dash.path"
+                [class.ring-indigo-100]="pathActual() === dash.path"
+                class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-md font-medium text-sm">
+          {{ dash.label }}
+        </button>
+      }
     </div>
 
     <button (click)="mostrarTabla()" 
             [class.bg-emerald-700]="vistaActual() === 'tabla'"
-            class="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all active:scale-95 shadow-lg font-bold flex items-center gap-2">
+            class="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors shadow-md font-bold flex items-center gap-2 text-sm">
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
         <path fill-rule="evenodd" d="M5 4a3 3 0 00-3 3v6a3 3 0 003 3h10a3 3 0 003-3V7a3 3 0 00-3-3H5zm-1 9v-1h5v2H5a1 1 0 01-1-1zm7 1h4a1 1 0 001-1v-1h-5v2zm0-4h5V8h-5v2zM9 8H4v2h5V8z" clip-rule="evenodd" />
       </svg>
@@ -33,25 +24,28 @@
 
   <div [ngSwitch]="vistaActual()">
     
-    <div *ngSwitchCase="'graficos'" class="relative bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden min-h-[750px] animate-in fade-in zoom-in-95 duration-500">
+    <div *ngSwitchCase="'graficos'" class="relative bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden min-h-[750px]">
       
-      <div *ngIf="loading()" class="absolute inset-0 flex flex-col items-center justify-center bg-white/90 backdrop-blur-sm z-50">
-        <div class="w-14 h-14 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin"></div>
-        <p class="mt-4 text-slate-500 font-medium animate-pulse">Sincronizando con Dash...</p>
-      </div>
+      @if (loading()) {
+        <div class="absolute inset-0 flex flex-col items-center justify-center bg-white z-50">
+          <div class="w-10 h-10 border-4 border-slate-100 border-t-indigo-600 rounded-full animate-spin"></div>
+          <p class="mt-4 text-slate-400 text-sm font-medium">Cargando datos...</p>
+        </div>
+      }
 
       <iframe 
-        [src]="dashUrl() | safe" 
+        [src]="dashUrl()" 
         (load)="onIframeLoad()"
-        class="w-full h-[750px] border-none transition-all duration-700 ease-out"
-        [ngClass]="{'opacity-0 scale-95': loading(), 'opacity-100 scale-100': !loading()}">
+        class="w-full h-[750px] border-none"
+        [style.opacity]="loading() ? '0' : '1'"
+        style="transition: opacity 0.2s ease-in-out;">
       </iframe>
     </div>
 
-    <div *ngSwitchCase="'tabla'" class="animate-in slide-in-from-bottom-4 fade-in duration-500">
-       <div class="mb-4">
+    <div *ngSwitchCase="'tabla'" class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+       <div class="mb-6">
          <h2 class="text-xl font-bold text-slate-800">Listado Maestro de Ventas</h2>
-         <p class="text-sm text-slate-500">Datos obtenidos directamente desde el CSV mediante Flask API</p>
+         <p class="text-sm text-slate-500">Datos crudos del sistema</p>
        </div>
        
        <app-sales-table></app-sales-table>
